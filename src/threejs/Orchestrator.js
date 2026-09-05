@@ -1,11 +1,18 @@
 import * as THREE from 'three'
 import Sizes from "./utils/Sizes"
 import Time from "./utils/Time"
+import Camera from './Camera'
+
+let instance = null
 
 export default class Orchestrator {
   
   constructor(canvas) {
-    
+ 
+    // Singleton
+    if(instance) return instance
+    instance = this
+
     // Options
     this.canvas = canvas
 
@@ -13,6 +20,7 @@ export default class Orchestrator {
     this.sizes = new Sizes()
     this.time = new Time()
     this.scene = new THREE.Scene()
+    this.camera = new Camera()
  
     // Resize event
     this.sizes.emitter.on('resize', () => {
@@ -26,10 +34,11 @@ export default class Orchestrator {
   }
 
   resize() {
+    this.camera.resize()
   }
 
   update() {
-
+    // this.camera.update()
   }
 
 }
