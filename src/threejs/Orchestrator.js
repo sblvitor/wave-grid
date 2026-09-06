@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import Sizes from "./utils/Sizes"
 import Time from "./utils/Time"
 import Camera from './Camera'
+import Renderer from './Renderer'
 
 let instance = null
 
@@ -21,6 +22,7 @@ export default class Orchestrator {
     this.time = new Time()
     this.scene = new THREE.Scene()
     this.camera = new Camera()
+    this.renderer = new Renderer()
  
     // Resize event
     this.sizes.emitter.on('resize', () => {
@@ -35,10 +37,12 @@ export default class Orchestrator {
 
   resize() {
     this.camera.resize()
+    this.renderer.resize()
   }
 
   update() {
     // this.camera.update()
+    this.renderer.update()
   }
 
 }
