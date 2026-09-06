@@ -3,6 +3,7 @@ import Sizes from "./utils/Sizes"
 import Time from "./utils/Time"
 import Camera from './Camera'
 import Renderer from './Renderer'
+import Stage from './Stage'
 
 let instance = null
 
@@ -23,6 +24,8 @@ export default class Orchestrator {
     this.scene = new THREE.Scene()
     this.camera = new Camera()
     this.renderer = new Renderer()
+
+    this.stage = new Stage()
  
     // Resize event
     this.sizes.emitter.on('resize', () => {
