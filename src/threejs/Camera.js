@@ -60,7 +60,7 @@ export default class Camera {
   setMouseListener() {
     window.addEventListener('mousemove', (e) => {
       this.mouse.x = (e.clientX / this.sizes.width) * 2 - 1
-      this.mouse.y = (e.clientY / this.sizes.height) * 2 + 1
+      this.mouse.y = -(e.clientY / this.sizes.height) * 2 + 1
     })
   }
 

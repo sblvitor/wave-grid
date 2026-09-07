@@ -7,7 +7,7 @@ export default class Stage {
     this.orchestrator = new Orchestrator()
     this.scene = this.orchestrator.scene
  
-    this.gridSize = 20
+    this.gridSize = 30
     this.cubeWidth = 0.8
     this.cubeHeight = 3
     this.params = {
