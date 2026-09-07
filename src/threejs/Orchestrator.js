@@ -1,6 +1,5 @@
 import * as THREE from 'three'
 import Sizes from "./utils/Sizes"
-import Time from "./utils/Time"
 import Camera from './Camera'
 import Renderer from './Renderer'
 import Stage from './Stage'
@@ -9,7 +8,7 @@ import Debug from './utils/Debug'
 let instance = null
 
 export default class Orchestrator {
-  
+
   constructor(canvas) {
  
     // Singleton
@@ -22,10 +21,11 @@ export default class Orchestrator {
     // Setup
     this.debug = new Debug()
     this.sizes = new Sizes()
-    this.time = new Time()
     this.scene = new THREE.Scene()
     this.camera = new Camera()
     this.renderer = new Renderer()
+    this.clock = new THREE.Timer()
+    this.clock.connect(document)
 
     this.stage = new Stage()
  
@@ -34,10 +34,7 @@ export default class Orchestrator {
       this.resize()
     })
 
-    // Tick event
-    this.time.emitter.on('tick', () => {
-      this.update()
-    })
+    this.renderer.instance.setAnimationLoop(this.animate.bind(this))
   }
 
   resize() {
@@ -45,9 +42,18 @@ export default class Orchestrator {
     this.renderer.resize()
   }
 
-  update() {
+  animate() {
+    this.clock.update()
+
+    const delta = this.clock.getDelta()
+    const elapsed = this.clock.getElapsed()
+
+    this.update(elapsed, delta)
+  }
+
+  update(_, delta) {
     this.camera.update()
-    this.stage.update(this.time.delta)
+    this.stage.update(delta)
     this.renderer.update()
   }
 
