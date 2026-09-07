@@ -1,3 +1,4 @@
+import MouseTrail from "./effects/MouseTrail";
 import Orchestrator from "./Orchestrator";
 import * as THREE from 'three'
 
@@ -23,8 +24,12 @@ export default class Stage {
       directional2Intensity: 1.0,
     }
 
+    // Physical world-unit footprint of the grid (centre-to-centre span).
+    this.bounds = this.gridSize * (this.cubeWidth + this.params.gap)
+
     this.setLighting()
     this.setGrid()
+    this.mouseTrail = new MouseTrail(this.bounds)
     this.setGUI()
   }
 
@@ -125,5 +130,9 @@ export default class Stage {
     }
     this.instancedMesh.instanceMatrix.needsUpdate = true
     this.offsetAttribute.needsUpdate = true
+  }
+
+  update(delta) {
+    this.mouseTrail.update(delta)
   }
 }
