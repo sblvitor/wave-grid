@@ -253,6 +253,133 @@ export default class Stage {
       .add(this.params, "gap", 0, 1, 0.01)
       .name('Gap')
       .onChange(() => this.updateGrid())
+
+    stageFolder
+      .add(this.params, 'waveAmplitude', 0, 10, 0.01)
+      .name('Wave Amplitude')
+      .onChange(() => {
+        if(this.shaderRef)
+          this.shaderRef.uniforms.uAmplitude.value = this.params.waveAmplitude
+      })
+
+    stageFolder
+      .add(this.params, 'waveSpeed', 1, 20, 0.1)
+      .name('Wave Speed')
+      .onChange((v) => {
+        if(this.shaderRef)
+          this.shaderRef.uniforms.uWaveSpeed.value = v
+      })
+
+    stageFolder
+      .add(this.params, 'waveFrequency', 0.1, 5, 0.05)
+      .name('Wave Frequency')
+      .onChange((v) => {
+        if(this.shaderRef)
+          this.shaderRef.uniforms.uWaveFreq.value = v
+      })
+
+    stageFolder
+      .add(this.params, 'waveWidth', 0.5, 10, 0.1)
+      .name('Wave Width')
+      .onChange((v) => {
+        if(this.shaderRef)
+          this.shaderRef.uniforms.uWaveWidth.value = v
+      })
+
+    stageFolder
+      .add(this.params, 'waveMaxHeight', 0, this.cubeWidth, 0.05)
+      .name('Wave Max Height')
+      .onChange(() => {
+        if(this.shaderRef)
+          this.shaderRef.uniforms.uMaxHeight.value = this.params.waveMaxHeight
+      })
+
+    stageFolder
+      .add(this.params, 'waveJitter', 0, 2, 1)
+      .name('Wave Jitter')
+      .onChange(() => {
+        if(this.shaderRef)
+          this.shaderRef.uniforms.uJitter.value = this.params.waveJitter
+      })
+ 
+    stageFolder
+      .add(this.params, 'colorBase')
+      .name('Base Color')
+      .onChange((v) => {
+        if(this.shaderRef)
+          this.shaderRef.uniforms.uColorBase.value.set(v)
+        this.scene.background = new THREE.Color(v).multiplyScalar(0.5)
+      })
+
+    stageFolder
+      .add(this.params, 'colorHigh')
+      .name('Wave Color')
+      .onChange((v) => {
+        if(this.shaderRef)
+          this.shaderRef.uniforms.uColorHigh.value.set(v)
+      })
+
+    // ── Trail wave controls ───────────────────────────────────────────────
+    const trailFolder = this.gui.addFolder("Trail");
+    const mw = this.mouseTrail;
+    const mu = mw.uniforms;
+
+    trailFolder
+      .add(mw.params, "fadeTime", 0.2, 6, 0.1)
+      .name("Fade Time")
+      .onChange((v) => {
+        mu.uFadeTime.value = v;
+      });
+
+    trailFolder
+      .add(mw.params, "trailSpacing", 0.1, 3, 0.05)
+      .name("Trail Spacing");
+
+    trailFolder.open();
+
+    // ── Lighting controls ─────────────────────────────────────────────────
+    const lightingFolder = this.gui.addFolder("Lighting");
+    const lp = this.lightingParams;
+
+    lightingFolder
+      .addColor(lp, "ambientColor")
+      .name("Ambient Color")
+      .onChange((v) => this.ambientLight.color.set(v));
+
+    lightingFolder
+      .add(lp, "ambientIntensity", 0.1, 5, 0.01)
+      .name("Ambient Intensity")
+      .onChange((v) => {
+        this.ambientLight.intensity = v;
+      });
+
+    lightingFolder
+      .addColor(lp, "directionalColor")
+      .name("Key Light Color")
+      .onChange((v) => this.directionalLight.color.set(v));
+
+    lightingFolder
+      .add(lp, "directionalIntensity", 0.1, 10, 0.01)
+      .name("Key Light Intensity")
+      .onChange((v) => {
+        this.directionalLight.intensity = v;
+      });
+
+    lightingFolder
+      .addColor(lp, "directional2Color")
+      .name("Fill Light Color")
+      .onChange((v) => this.directionalLight2.color.set(v));
+
+    lightingFolder
+      .add(lp, "directional2Intensity", 0.1, 10, 0.01)
+      .name("Fill Light Intensity")
+      .onChange((v) => {
+        this.directionalLight2.intensity = v;
+      });
+
+    lightingFolder
+      .add(this.shadowCameraHelper, "visible")
+      .name("Show Shadow Camera");
   }
 
   updateGrid() {
