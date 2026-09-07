@@ -8,12 +8,22 @@ export default class Stage {
     this.orchestrator = new Orchestrator()
     this.scene = this.orchestrator.scene
  
-    this.gridSize = 30
+    this.gridSize = 40
     this.cubeWidth = 0.8
     this.cubeHeight = 3
     this.params = {
-      gap: 0.01
+      gap: 0.01,
+      waveAmplitude: 0.4,
+      waveSpeed: 6.0,
+      waveFrequency: 1.2,
+      waveWidth: 3.0,
+      waveJitter: 0.2,
+      waveMaxHeight: 0.4,
+      colorBase : "#ffffff",
+      colorHigh: "#0055ff"
     }
+
+    this.scene.background = new THREE.Color(this.params.colorBase).multiplyScalar(0.5)
 
     this.lightingParams = {
       ambientColor: '#ffffff',
@@ -27,37 +37,13 @@ export default class Stage {
     // Physical world-unit footprint of the grid (centre-to-centre span).
     this.bounds = this.gridSize * (this.cubeWidth + this.params.gap)
 
+    this.shaderRef = null
+
     this.setLighting()
     this.setGrid()
     this.mouseTrail = new MouseTrail(this.bounds)
     this.setGUI()
   }
-
-  setGrid() {
-    const count = this.gridSize * this.gridSize
-    const geometry = new THREE.BoxGeometry(
-      this.cubeWidth, // width: 0.8
-      this.cubeHeight, // height: 3
-      this.cubeWidth
-    )
-    const material = new THREE.MeshPhongMaterial({ color: 0xffffff })
-
-    // Per-instance XZ world position passed to the vertex shader
-    this.offsetAttribute = new THREE.InstancedBufferAttribute(
-      new Float32Array(count * 2),
-      2
-    )
-    geometry.setAttribute("aOffset", this.offsetAttribute)
-
-    this.instancedMesh = new THREE.InstancedMesh(geometry, material, count)
-    this.instancedMesh.castShadow = true
-    this.instancedMesh.receiveShadow = true
-    this.scene.add(this.instancedMesh)
-
-    // Arrange cube instances into a grid
-    this.updateGrid()
-  }
-
 
   setLighting() {
     const lp = this.lightingParams
@@ -98,6 +84,163 @@ export default class Stage {
     )
     this.shadowCameraHelper.visible = false
     this.scene.add(this.shadowCameraHelper)
+  }
+
+  overrideVertexShader(vertexShader) {
+    return vertexShader
+      .replace(
+        "#include <common>",
+        `#include <common>
+        varying float vHeight;
+        attribute vec2 aOffset;
+        uniform sampler2D uTrailTexture;
+        uniform int uTrailCount;
+        uniform float uWaveSpeed;
+        uniform float uWaveFreq;
+        uniform float uWaveWidth;
+        uniform float uFadeTime;
+        uniform float uAmplitude;
+        uniform float uJitter;
+        uniform float uMaxHeight;
+
+        // Deterministic per-instance hash -> two values in [-0.5, 0.5]
+        // Stable across frames; depends only on world position
+        vec2 hash2(vec2 p) {
+          p = vec2(
+            dot(p, vec2(127.1, 311.7)),
+            dot(p, vec2(269.5, 183.3))
+          );
+          return fract(sin(p) * 43758.5453123) - 0.5;
+        }`,
+      )
+      .replace(
+        "#include <begin_vertex>",
+        `#include <begin_vertex>
+        vHeight = 0.0;
+
+        if ( position.y > 0.0 ) {
+          vec2 jitter  = hash2( aOffset ) * uJitter;
+          vec2 worldXZ = aOffset + jitter;
+          float waveHeight  = 0.0;
+          float totalWeight = 0.0;
+
+          for ( int i = 0; i < uTrailCount; i++ ) {
+            // texel layout: (worldX, worldZ, age, distDelta)
+            vec4 td = texture2D(
+              uTrailTexture,
+              vec2( ( float(i) + 0.5 ) / 128.0, 0.5 )
+            );
+            float dist      = length( worldXZ - td.rg );
+            float wavefront = uWaveSpeed * td.b;
+            float relDist   = dist - wavefront;
+
+            // Gaussian envelope centred on the expanding wavefront
+            float window = exp( -( relDist * relDist ) / ( uWaveWidth * uWaveWidth ) );
+            // Exponential time-fade + distance attenuation
+            float fade   = exp( -td.b / uFadeTime );
+            float atten  = 1.0 / ( 1.0 + dist * 0.1 );
+            float weight = fade * window * atten * td.a; // td.a is distDelta, used to weaken waves from closely spaced trail points
+
+            waveHeight  += weight * cos( uWaveFreq * relDist );
+            totalWeight += weight;
+          }
+
+          // Weighted average: overlapping waves average rather than stack,
+          // cancelling chaotic superposition while preserving single-wave peaks.
+          waveHeight /= max( totalWeight, 1.0 );
+
+          float displacement = clamp( waveHeight * uAmplitude, -uMaxHeight, uMaxHeight );
+          transformed.y += displacement;
+          vHeight = displacement;
+        }`
+      )
+  }
+
+  setGrid() {
+    const count = this.gridSize * this.gridSize
+    const geometry = new THREE.BoxGeometry(
+      this.cubeWidth, // width: 0.8
+      this.cubeHeight, // height: 3
+      this.cubeWidth
+    )
+
+    // Per-instance XZ world position passed to the vertex shader
+    this.offsetAttribute = new THREE.InstancedBufferAttribute(
+      new Float32Array(count * 2),
+      2
+    )
+    geometry.setAttribute("aOffset", this.offsetAttribute)
+
+    const material = new THREE.MeshPhongMaterial({ color: 0xffffff })
+
+    material.onBeforeCompile = (shader) => {
+      // Attach trail-wave uniforms by reference so MouseTrail.update()
+      // mutations are automatically reflected each frame without extra work here.
+      const mu = this.mouseTrail.uniforms
+      shader.uniforms.uTrailTexture = mu.uTrailTexture
+      shader.uniforms.uTrailCount = mu.uTrailCount
+      shader.uniforms.uFadeTime = mu.uFadeTime
+      shader.uniforms.uWaveSpeed = { value: this.params.waveSpeed }
+      shader.uniforms.uWaveFreq = { value: this.params.waveFrequency }
+      shader.uniforms.uWaveWidth = { value: this.params.waveWidth }
+      shader.uniforms.uAmplitude = { value: this.params.waveAmplitude }
+      shader.uniforms.uJitter = { value: this.params.waveJitter }
+      shader.uniforms.uMaxHeight = { value: this.params.waveMaxHeight }
+      shader.uniforms.uColorBase = {
+        value: new THREE.Color(this.params.colorBase),
+      }
+      shader.uniforms.uColorHigh = {
+        value: new THREE.Color(this.params.colorHigh),
+      }
+
+      shader.vertexShader = this.overrideVertexShader(shader.vertexShader)
+
+      shader.fragmentShader = shader.fragmentShader
+        .replace(
+          "#include <common>",
+          `#include <common>
+          varying float vHeight;
+          uniform vec3  uColorBase;
+          uniform vec3  uColorHigh;
+          uniform float uMaxHeight;`
+        )
+        .replace(
+          "#include <color_fragment>",
+          `#include <color_fragment>
+          float t = clamp( vHeight / uMaxHeight, 0.0, 1.0 );
+          diffuseColor.rgb = mix( uColorBase, uColorHigh, t );`
+        )
+
+      this.shaderRef = shader
+    }
+
+    const depthMaterial = new THREE.MeshDepthMaterial()
+
+    depthMaterial.onBeforeCompile = (shader) => {
+      const mu = this.mouseTrail.uniforms;
+      shader.uniforms.uTrailTexture = mu.uTrailTexture;
+      shader.uniforms.uTrailCount = mu.uTrailCount;
+      shader.uniforms.uFadeTime = mu.uFadeTime;
+      shader.uniforms.uWaveSpeed = { value: this.params.waveSpeed };
+      shader.uniforms.uWaveFreq = { value: this.params.waveFrequency };
+      shader.uniforms.uWaveWidth = { value: this.params.waveWidth };
+      shader.uniforms.uAmplitude = { value: this.params.waveAmplitude };
+      shader.uniforms.uJitter = { value: this.params.waveJitter };
+      shader.uniforms.uMaxHeight = { value: this.params.waveMaxHeight };
+
+      shader.vertexShader = this.overrideVertexShader(
+        shader.vertexShader,
+      );
+    }
+
+    this.instancedMesh = new THREE.InstancedMesh(geometry, material, count)
+    this.instancedMesh.customDepthMaterial = depthMaterial
+    this.instancedMesh.castShadow = true
+    this.instancedMesh.receiveShadow = true
+    this.scene.add(this.instancedMesh)
+
+    // Arrange cube instances into a grid
+    this.updateGrid()
   }
 
   setGUI() {
