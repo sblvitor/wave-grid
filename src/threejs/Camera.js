@@ -9,7 +9,22 @@ export default class Camera {
     this.scene = this.orchestrator.scene
     this.canvas = this.orchestrator.canvas
 
+    // Orbit parameters
+    this.radius = 12
+
+    // Max mouse influence in radians
+    // mouse Y -> rotation around X axis (up and down tilt)
+    // mouse X -> rotation around Z axis (left/right orbit)
+    this.alphaRange = Math.PI * 0.03 // ~14° around X
+    this.betaRange = Math.PI * 0.05 // ~22° around Z
+
+    // Normalized mouse [-1, 1] and its lerped counterpart (?)
+    this.mouse = new THREE.Vector2(0, 0)
+    this.lerpedMouse = new THREE.Vector2(0, 0)
+
     this.setInstance()
+    this.setMouseListener()
+    this.setGUI()
   }
 
   setInstance(){
@@ -19,8 +34,34 @@ export default class Camera {
       0.1,
       200
     )
-    this.instance.position.set(0, 0, 4)
+    this._updatePosition(0, 0)
     this.scene.add(this.instance)
+  }
+
+  _updatePosition(mx, my) {
+    // tilt angles (?)
+    // α: rotation around X axis (mouse Y)
+    // β: rotation around Z axis (mouse X)
+    const alpha = my * this.alphaRange
+    const beta = mx * this.betaRange
+
+    // Start at (0, r, 0), apply X rotation then Z rotation:
+    // After X: (0, r*cosα, r*sinα)
+    // After Z: (-r*cosα*sinβ, r*cosα*cosβ, r*sinα)
+    this.instance.position.set(
+      -this.radius * Math.cos(alpha) * Math.sin(beta),
+      this.radius * Math.cos(alpha) * Math.cos(beta),
+      this.radius * Math.sin(alpha)
+    )
+    this.instance.up.set(0, 0, -1)
+    this.instance.lookAt(0, 0, 0)
+  }
+
+  setMouseListener() {
+    window.addEventListener('mousemove', (e) => {
+      this.mouse.x = (e.clientX / this.sizes.width) * 2 - 1
+      this.mouse.y = (e.clientY / this.sizes.height) * 2 + 1
+    })
   }
 
   resize() {
@@ -28,5 +69,20 @@ export default class Camera {
     this.instance.updateProjectionMatrix()
   }
   
-  // update() {}
+  update() {
+    // Lerp mouse toward actual cursor position
+    this.lerpedMouse.x += (this.mouse.x - this.lerpedMouse.x) * 0.04
+    this.lerpedMouse.y += (this.mouse.y - this.lerpedMouse.y) * 0.04
+    this._updatePosition(this.lerpedMouse.x, this.lerpedMouse.y)
+  }
+
+  setGUI() {
+    this.gui = this.orchestrator.debug.ui
+    if(!this.gui) return
+
+    const cameraFolder = this.gui.addFolder('Camera')
+    cameraFolder
+      .add(this, "radius", 10, 20, 0.01)
+      .name('Distance')
+  }
 }

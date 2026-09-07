@@ -46,7 +46,7 @@ export default class Orchestrator {
   }
 
   update() {
-    // this.camera.update()
+    this.camera.update()
     this.renderer.update()
   }
 
