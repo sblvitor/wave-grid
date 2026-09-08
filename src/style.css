@@ -1,6 +1,10 @@
-* {
-  margin: 0;
-  padding: 0;
+@import "tailwindcss";
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+  }
 }
 
 html,
@@ -14,3 +18,8 @@ body {
   left: 0;
   outline: none;
 }
+
+/* #fcba04 amarelo */
+/* #121212 quase preto */
+/* #191414 preto aquecido */
+/* #0B0B0B cinza escuro */
