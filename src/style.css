@@ -81,6 +81,7 @@ header h1 {
 
 nav {
   display: flex;
+  align-items: center;
   gap: 3rem;
 }
 
@@ -88,6 +89,18 @@ nav button {
   all: unset;
   cursor: pointer;
   font-size: 20px;
+}
+
+.content {
+  margin-top: 40vh;
+  display: grid;
+  grid-template-columns: 36% 1fr 10%;
+}
+
+.content h1 {
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 400;
+  grid-column: 2;
 }
 
 /* #fcba04 amarelo */
