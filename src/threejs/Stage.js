@@ -1,6 +1,7 @@
 import MouseTrail from "./effects/MouseTrail";
 import Orchestrator from "./Orchestrator";
 import * as THREE from 'three'
+import Utils from "./utils/Utils";
 
 export default class Stage {
  
@@ -19,8 +20,8 @@ export default class Stage {
       waveWidth: 3.0,
       waveJitter: 0.2,
       waveMaxHeight: 0.4,
-      colorBase : "#ffffff",
-      colorHigh: "#0055ff"
+      colorBase : Utils.getCSSColor('--baseColor'),
+      colorHigh: Utils.getCSSColor('--waveColor')
     }
 
     this.scene.background = new THREE.Color(this.params.colorBase).multiplyScalar(0.5)
@@ -43,6 +44,32 @@ export default class Stage {
     this.setGrid()
     this.mouseTrail = new MouseTrail(this.bounds)
     this.setGUI()
+
+    this.watchTheme()
+  }
+
+  watchTheme() {
+    const observer = new MutationObserver(() => {
+      this.updateThemeColor()
+    })
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    })
+  }
+
+  updateThemeColor() {
+    const baseColor = Utils.getCSSColor('--baseColor')
+    const waveColor = Utils.getCSSColor('--waveColor')
+    this.params.colorBase = baseColor
+    this.params.colorHigh = waveColor
+
+    if(this.shaderRef) {
+      this.shaderRef.uniforms.uColorBase.value.set(baseColor)
+      this.shaderRef.uniforms.uColorHigh.value.set(waveColor)
+    }
+    this.scene.background = new THREE.Color(baseColor).multiplyScalar(0.5)
   }
 
   setLighting() {

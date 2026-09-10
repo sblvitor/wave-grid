@@ -1,3 +1,27 @@
+:root {
+  --text: #000000;
+  --baseColor: #ffffff;
+  --waveColor: #0055ff;
+}
+
+[data-theme="dark"] {
+  --text: #f5f5f5;
+  --baseColor: #121212;
+  --waveColor: #fcba04;
+}
+
+#light-off {
+  display: none;
+}
+
+[data-theme="dark"] #light-on {
+  display: none;
+}
+
+[data-theme="dark"] #light-off {
+  display: block;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -8,6 +32,7 @@ html,
 body {
   overflow: hidden;
   font-family: "Familjen Grotesk", sans-serif;
+  color: var(--text);
 }
 
 .webgl {
