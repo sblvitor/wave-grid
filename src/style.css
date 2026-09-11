@@ -55,6 +55,12 @@ body {
   z-index: 1;
 }
 
+header h1,
+header nav button,
+.content h1 {
+  opacity: 0;
+}
+
 .overlay button {
   pointer-events: all;
 }

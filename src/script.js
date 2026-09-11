@@ -1,6 +1,10 @@
 import './style.css'
 import Orchestrator from './threejs/Orchestrator'
 import { content } from './constants'
+import gsap from 'gsap'
+import { SplitText } from 'gsap/SplitText'
+
+gsap.registerPlugin(SplitText)
 
 new Orchestrator(document.querySelector('canvas.webgl'))
 
@@ -31,3 +35,27 @@ navButtons.forEach((button) => {
     h1.textContent = content[section]
   })
 })
+
+// Animations
+
+const animatedElements = [
+  'header h1',
+  'header nav button',
+  '.content h1'
+]
+
+gsap.fromTo(
+  animatedElements,
+  {
+    opacity: 0,
+    y: 20,
+  },
+  {
+    opacity: 1,
+    y: 0,
+    duration: 1,
+    stagger: 0.1,
+    ease: 'power3.out',
+    delay: 0.5
+  }
+)
