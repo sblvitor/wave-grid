@@ -3,6 +3,7 @@ import Orchestrator from './threejs/Orchestrator'
 import { content } from './constants'
 import gsap from 'gsap'
 import { SplitText } from 'gsap/SplitText'
+import { setupHoverSplitAnimation } from './animations/hoverSplit'
 
 gsap.registerPlugin(SplitText)
 
@@ -60,59 +61,6 @@ gsap.fromTo(
   }
 )
 
-const aboutBtn = document.querySelector('.about')
-
-let aboutSplit
-let contentSplit
-let splitReady = document.fonts.ready.then(() => {
-  aboutSplit = SplitText.create('.about', { type: 'chars' })
-  contentSplit = SplitText.create('.content h1', { type: 'words' })
+document.querySelectorAll('.nav-link').forEach((button) => {
+  setupHoverSplitAnimation(button)
 })
-
-const tl = gsap.timeline({ paused: true })
-
-aboutBtn.addEventListener('mouseenter', async () => {
-  await splitReady
-  console.log('mouseenter')
-  // gsap.set(['.about', aboutSplit.chars], {
-  //   opacity: 0,
-  //   filter: 'blur(12px)',
-  //   willChange: "filter, opacity"
-  // })
-  tl.to(aboutSplit.chars, {
-    yPercent: (index) => index % 2 === 0 ? -50 : 50 ,
-    opacity: 0,
-    filter: 'blur(12px)',
-    stagger: {
-      each: 0.08,
-      // from: 'random'
-    },
-    duration: 1
-  })
-  // .to(aboutSplit.chars, {
-  //   yPercent: 0,
-  //   opacity: 1,
-  //   filter: "blur(0px)",
-  //   duration: 0.8,
-  //   stagger: {
-  //     each: 0.08,
-  //     // from: "start"
-  //   },
-  //   ease: "power2.out",
-  // }, '-=0.5')
-  tl.play()
-})
-
-// navButtons.forEach((button) => {
-//   button.addEventListener('mouseenter', async () => {
-//     await splitReady
-//     gsap.from(navLinkSplit.chars, {
-//       yPercent: "random([-100, 100])",
-//       autoAlpha: 0,
-//       stagger: {
-//         amount: 0.5,
-//         from: 'random'
-//       }
-//     })
-//   })
-// })
