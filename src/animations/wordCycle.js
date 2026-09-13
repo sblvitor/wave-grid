@@ -11,10 +11,14 @@ function cycleWord(el) {
 
   activeTween = gsap.timeline()
     .to(exitSplit.chars, {
-      yPercent: -100,
-      opacity: 0,
-      stagger: 0.02,
-      duration: 0.35,
+      // yPercent: -100,
+      autoAlpha: 0,
+      filter: 'blur(12px)',
+      stagger: {
+        each: 0.08,
+        from: 'random'
+      },
+      duration: 0.5,
       ease: 'power2.in',
     })
     .call(() => {
@@ -24,17 +28,21 @@ function cycleWord(el) {
       el.textContent = lastAboutWord[wordIndex]
 
       const enterSplit = SplitText.create(el, { type: 'chars' })
-      gsap.set(enterSplit.chars, { yPercent: 100, opacity: 0 })
+      gsap.set(enterSplit.chars, { autoAlpha: 0, filter: 'blur(12px)' })
 
       activeTween = gsap.to(enterSplit.chars, {
-        yPercent: 0,
-        opacity: 1,
-        stagger: 0.02,
-        duration: 0.35,
+        // yPercent: 0,
+        autoAlpha: 1,
+        filter: 'blur(0px)',
+        stagger: {
+          each: 0.08,
+          from: 'random'
+        },
+        duration: 0.8,
         ease: 'power2.out',
         onComplete: () => {
           enterSplit.revert()
-          pendingCall = gsap.delayedCall(2.3, () => cycleWord(el))
+          pendingCall = gsap.delayedCall(2.5, () => cycleWord(el))
         }
       })
     })
