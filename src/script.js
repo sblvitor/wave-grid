@@ -28,7 +28,6 @@ themeToggleBtn.addEventListener('click', () => {
 
 // Content management
 const h1 = document.querySelector('.content h1')
-// h1.textContent = content.about
 
 function renderSection(section) {
   stopAboutWordCycle()
