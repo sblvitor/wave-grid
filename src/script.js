@@ -38,7 +38,7 @@ function renderSection(section) {
     const wordEl = h1.querySelector('.word-cycle')
     startAboutWordCycle(wordEl)
   } else {
-    h1.textContent = content[section]
+    h1.innerHTML = content[section]
   }
 }
 
