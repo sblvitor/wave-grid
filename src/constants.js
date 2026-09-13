@@ -1,12 +1,14 @@
 const lastAboutWord = [
-  'learning',
-  'building',
-  'creating',
-  'exploring'
+  'learning.',
+  'building.',
+  'creating.',
+  'exploring.'
 ]
 
+const aboutBase = 'Software Engineer from Brazil with a passion for creative, immersive and memorable experiences on the web. I enjoy turning complex ideas into something people can feel — always'
+
 const content = {
-  about: `Software Engineer from Brazil with a passion for creative, immersive and memorable experiences on the web. I enjoy turning complex ideas into something people can feel — always ${lastAboutWord[0]}.`,
+  about: `${aboutBase} ${lastAboutWord[0]}`,
   experience: 'Experience text',
   projects: 'Projects text',
   contact: 'Contacts',
@@ -14,5 +16,6 @@ const content = {
 
 export {
   content,
-  lastAboutWord
+  lastAboutWord,
+  aboutBase
 }

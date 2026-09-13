@@ -109,6 +109,12 @@ nav button {
   grid-column: 2;
 }
 
+.content h1 .word-cycle {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+
 /* #fcba04 amarelo */
 /* #121212 quase preto */
 /* #191414 preto aquecido */

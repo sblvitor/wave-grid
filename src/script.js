@@ -1,9 +1,10 @@
 import './style.css'
 import Orchestrator from './threejs/Orchestrator'
-import { content } from './constants'
+import { aboutBase, content, lastAboutWord } from './constants'
 import gsap from 'gsap'
 import { SplitText } from 'gsap/SplitText'
 import { setupHoverSplitAnimation } from './animations/hoverSplit'
+import { startAboutWordCycle, stopAboutWordCycle } from './animations/wordCycle'
 
 gsap.registerPlugin(SplitText)
 
@@ -27,13 +28,27 @@ themeToggleBtn.addEventListener('click', () => {
 
 // Content management
 const h1 = document.querySelector('.content h1')
-h1.textContent = content.about
+// h1.textContent = content.about
+
+function renderSection(section) {
+  stopAboutWordCycle()
+
+  if(section === 'about') {
+    h1.innerHTML = `${aboutBase} <span class="word-cycle">${lastAboutWord[0]}</span>`
+    const wordEl = h1.querySelector('.word-cycle')
+    startAboutWordCycle(wordEl)
+  } else {
+    h1.textContent = content[section]
+  }
+}
+
+renderSection('about')
 
 const navButtons = document.querySelectorAll('.nav-link')
 navButtons.forEach((button) => {
   button.addEventListener('click', () => {
     const section = button.dataset.section
-    h1.textContent = content[section]
+    renderSection(section)
   })
 })
 
