@@ -11,7 +11,6 @@ function cycleWord(el) {
 
   activeTween = gsap.timeline()
     .to(exitSplit.chars, {
-      // yPercent: -100,
       autoAlpha: 0,
       filter: 'blur(12px)',
       stagger: {
@@ -31,7 +30,6 @@ function cycleWord(el) {
       gsap.set(enterSplit.chars, { autoAlpha: 0, filter: 'blur(12px)' })
 
       activeTween = gsap.to(enterSplit.chars, {
-        // yPercent: 0,
         autoAlpha: 1,
         filter: 'blur(0px)',
         stagger: {
