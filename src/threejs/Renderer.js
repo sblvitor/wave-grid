@@ -1,4 +1,7 @@
-import { EffectComposer, OutputPass, RenderPass, ShaderPass } from "three/examples/jsm/Addons.js";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
+import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import Orchestrator from "./Orchestrator";
 import * as THREE from 'three'
 import { VignetteRGBShiftShader } from "./effects/VignetteRGBShiftShader";
