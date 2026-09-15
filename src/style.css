@@ -57,7 +57,7 @@ body {
 
 header h1,
 header nav button,
-.content h1 {
+.content section {
   opacity: 0;
 }
 
@@ -67,7 +67,6 @@ header nav button,
 }
 
 header {
-  /* background: red; */
   position: absolute;
   top: 0;
   left: 0;
@@ -96,37 +95,41 @@ nav button {
   all: unset;
   cursor: pointer;
   font-size: 20px;
+  text-transform: uppercase;
 }
 
 .content {
   margin-top: 40vh;
   display: grid;
   grid-template-columns: 36% 1fr 10%;
+  /* background: red; */
 }
 
-.content h1 {
+.content section {
+  grid-column: 2;
+}
+
+section:not(.is-active) {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.content p {
   font-size: clamp(1.6rem, 2.6vw, 2.1rem);
   font-weight: 400;
   font-style: italic;
   line-height: 1.4;
   letter-spacing: -0.01em;
-  grid-column: 2;
 }
 
-.content h1 .word-cycle {
-  display: inline-block;
-  overflow: hidden;
-  vertical-align: bottom;
-}
-
-.content h1 a {
+.content section a {
   color: var(--waveColor);
   text-decoration: none;
   border-bottom: 1px solid currentColor;
   transition: opacity 0.2s ease;
 }
 
-.content h1 a:hover {
+.content section a:hover {
   opacity: 0.7;
 }
 

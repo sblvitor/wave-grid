@@ -1,6 +1,5 @@
 import './style.css'
 import Orchestrator from './threejs/Orchestrator'
-import { aboutBase, content, lastAboutWord } from './constants'
 import gsap from 'gsap'
 import { SplitText } from 'gsap/SplitText'
 import { setupHoverSplitAnimation } from './animations/hoverSplit'
@@ -27,21 +26,31 @@ themeToggleBtn.addEventListener('click', () => {
 })
 
 // Content management
-const h1 = document.querySelector('.content h1')
+
+let currentSection = 'about'
+let isAnimating = false
 
 function renderSection(section) {
+  if(isAnimating || section === currentSection) return
+  isAnimating = true
+
+  const outgoing = document.querySelector('.content section.is-active')
+  const incoming = document.querySelector(`.content section[data-section="${section}"]`)
+
   stopAboutWordCycle()
 
-  if(section === 'about') {
-    h1.innerHTML = `${aboutBase} <span class="word-cycle">${lastAboutWord[0]}</span>`
-    const wordEl = h1.querySelector('.word-cycle')
-    startAboutWordCycle(wordEl)
-  } else {
-    h1.innerHTML = content[section]
-  }
+  outgoing.classList.remove('is-active')
+  incoming.classList.add('is-active')
+
+  isAnimating = false
+
+  if(section === 'about')
+    startAboutWordCycle(document.querySelector('.word-cycle'))
+
+  currentSection = section
 }
 
-renderSection('about')
+startAboutWordCycle(document.querySelector('.word-cycle'))
 
 const navButtons = document.querySelectorAll('.nav-link')
 navButtons.forEach((button) => {
@@ -56,7 +65,7 @@ navButtons.forEach((button) => {
 const animatedElements = [
   'header h1',
   'header nav button',
-  '.content h1'
+  '.content section'
 ]
 
 gsap.fromTo(
