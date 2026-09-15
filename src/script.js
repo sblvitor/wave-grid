@@ -3,6 +3,7 @@ import Orchestrator from './threejs/Orchestrator'
 import gsap from 'gsap'
 import { SplitText } from 'gsap/SplitText'
 import { setupHoverSplitAnimation } from './animations/hoverSplit'
+import { startLocalTime } from './localTime'
 import { resetAboutWordCycle, startAboutWordCycle, stopAboutWordCycle } from './animations/wordCycle'
 
 gsap.registerPlugin(SplitText)
@@ -101,10 +102,14 @@ function renderSection(section) {
 
 // Animations
 
+startLocalTime(document.querySelector('footer p'))
+
 const animatedElements = [
   'header h1',
   'header nav button',
-  '.content section'
+  '.content section',
+  'footer a',
+  'footer p'
 ]
 
 gsap.fromTo(

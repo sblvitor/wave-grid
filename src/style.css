@@ -52,6 +52,7 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   padding: 2rem;
   pointer-events: none;
   z-index: 1;
@@ -59,7 +60,9 @@ body {
 
 header h1,
 header nav button,
-.content section {
+.content section,
+footer a,
+footer p {
   opacity: 0;
 }
 
@@ -133,14 +136,20 @@ section:not(.is-active) {
   letter-spacing: -0.01em;
 }
 
-.content section a {
+.content section a,
+footer a {
   position: relative;
   display: inline-block;
-  color: var(--waveColor);
   text-decoration: none;
 }
 
-.content section a::after {
+.content section a,
+footer a {
+  color: var(--waveColor);
+}
+
+.content section a::after,
+footer a::after {
   content: '';
   position: absolute;
   left: 0;
@@ -153,7 +162,8 @@ section:not(.is-active) {
   transition: transform 0.35s ease;
 }
 
-.content section a:hover::after {
+.content section a:hover::after,
+footer a:hover::after {
   transform: scaleX(1);
   transform-origin: left;
 }
@@ -175,7 +185,7 @@ section:not(.is-active) {
   letter-spacing: 0.1em;
 }
 
-/* #fcba04 amarelo */
-/* #121212 quase preto */
-/* #191414 preto aquecido */
-/* #0B0B0B cinza escuro */
+footer {
+  display: flex;
+  justify-content: space-between;
+}
