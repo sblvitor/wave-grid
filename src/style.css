@@ -50,6 +50,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -129,7 +130,7 @@ section:not(.is-active) {
 }
 
 .content p {
-  font-size: clamp(1.6rem, 2.6vw, 2.1rem);
+  font-size: clamp(1.25rem, 2.6vw, 2.1rem);
   font-weight: 400;
   font-style: italic;
   line-height: 1.4;
@@ -162,10 +163,12 @@ footer a::after {
   transition: transform 0.35s ease;
 }
 
-.content section a:hover::after,
-footer a:hover::after {
-  transform: scaleX(1);
-  transform-origin: left;
+@media (hover: hover) {
+  .content section a:hover::after,
+  footer a:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
 }
 
 /* Contact */
@@ -188,4 +191,80 @@ footer a:hover::after {
 footer {
   display: flex;
   justify-content: space-between;
+}
+
+/* Responsive */
+
+@media (max-width: 1024px) {
+  header {
+    padding: 1rem 2rem;
+  }
+
+  nav {
+    gap: 1.75rem;
+  }
+
+  nav button {
+    font-size: 1rem;
+  }
+
+  .content {
+    grid-template-columns: 1fr;
+    margin-top: max(32vh, 8rem);
+  }
+
+  .content section {
+    grid-column: 1;
+  }
+}
+
+@media (max-width: 720px) {
+  .overlay {
+    padding: 1.25rem;
+  }
+
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem 0.75rem;
+  }
+
+  header h1 {
+    font-size: clamp(2rem, 9vw, 2.5rem);
+  }
+
+  header nav {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  nav button {
+    font-size: 0.8125rem;
+  }
+
+  nav .nav-link {
+    padding-block: 0.8rem;
+  }
+
+  .content {
+    margin-top: max(30vh, 9rem);
+  }
+
+  .content .contact-section ul {
+    gap: 0.5rem 1.25rem;
+    margin-top: 1.25rem;
+  }
+
+  footer {
+    font-size: 0.75rem;
+    gap: 1rem;
+  }
+}
+
+@media (hover: none) {
+  nav .nav-link {
+    padding-block: 0.8rem;
+  }
 }
