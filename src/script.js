@@ -28,6 +28,15 @@ themeToggleBtn.addEventListener('click', () => {
 // Content management
 
 const sections = new Map()
+const navButtons = document.querySelectorAll('.nav-link')
+
+function setActiveNav(section) {
+  navButtons.forEach((button) => {
+    if (button.dataset.section === section) button.setAttribute('aria-current', 'true')
+    else button.removeAttribute('aria-current')
+  })
+}
+
 document.fonts.ready.then(() => {
   document.querySelectorAll('.content section').forEach((el) => {
     const name = el.dataset.section
@@ -58,7 +67,7 @@ document.fonts.ready.then(() => {
   sections.get('about').tl.progress(1)
   startAboutWordCycle(document.querySelector('.word-cycle'))
 
-  document.querySelectorAll('.nav-link').forEach((button) => {
+  navButtons.forEach((button) => {
     button.addEventListener('click', () => renderSection(button.dataset.section))
   })
 })
@@ -71,6 +80,7 @@ function renderSection(section) {
   if(section === currentSection) return
 
   pendingEnter?.kill()
+  setActiveNav(section)
 
   const outgoing = sections.get(currentSection)
   const incoming = sections.get(section)
@@ -113,6 +123,6 @@ gsap.fromTo(
   }
 )
 
-document.querySelectorAll('.nav-link').forEach((button) => {
+navButtons.forEach((button) => {
   setupHoverSplitAnimation(button)
 })
