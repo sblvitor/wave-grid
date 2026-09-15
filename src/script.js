@@ -3,7 +3,7 @@ import Orchestrator from './threejs/Orchestrator'
 import gsap from 'gsap'
 import { SplitText } from 'gsap/SplitText'
 import { setupHoverSplitAnimation } from './animations/hoverSplit'
-import { startAboutWordCycle, stopAboutWordCycle } from './animations/wordCycle'
+import { resetAboutWordCycle, startAboutWordCycle, stopAboutWordCycle } from './animations/wordCycle'
 
 gsap.registerPlugin(SplitText)
 
@@ -27,38 +27,67 @@ themeToggleBtn.addEventListener('click', () => {
 
 // Content management
 
+const sections = new Map()
+document.fonts.ready.then(() => {
+  document.querySelectorAll('.content section').forEach((el) => {
+    const name = el.dataset.section
+    const split = SplitText.create(el, { type: 'words', ignore: '.word-cycle' })
+    
+    const wordEl = el.querySelector('.word-cycle')
+
+    const tl = gsap.timeline({
+      paused: true,
+      onReverseComplete: () => {
+        el.classList.remove('is-active')
+        if (name === 'about') resetAboutWordCycle()
+      },
+      onComplete: () => {
+        if(name === 'about') startAboutWordCycle(wordEl)
+      }
+    })
+
+    tl.from([split.words, wordEl].filter(Boolean), {
+      y: 100,
+      ease: 'back.out',
+      autoAlpha: 0,
+      stagger: { amount: 0.4, from: 'random' }
+    })
+
+    sections.set(name, { el, split, tl })
+  })
+  sections.get('about').tl.progress(1)
+  startAboutWordCycle(document.querySelector('.word-cycle'))
+
+  document.querySelectorAll('.nav-link').forEach((button) => {
+    button.addEventListener('click', () => renderSection(button.dataset.section))
+  })
+})
+
+const OVERLAP = 0.1
 let currentSection = 'about'
-let isAnimating = false
+let pendingEnter = null
 
 function renderSection(section) {
-  if(isAnimating || section === currentSection) return
-  isAnimating = true
+  if(section === currentSection) return
 
-  const outgoing = document.querySelector('.content section.is-active')
-  const incoming = document.querySelector(`.content section[data-section="${section}"]`)
+  pendingEnter?.kill()
+
+  const outgoing = sections.get(currentSection)
+  const incoming = sections.get(section)
 
   stopAboutWordCycle()
 
-  outgoing.classList.remove('is-active')
-  incoming.classList.add('is-active')
+  outgoing.tl.reverse()
 
-  isAnimating = false
+  const delay = Math.max(outgoing.tl.time() - OVERLAP, 0)
 
-  if(section === 'about')
-    startAboutWordCycle(document.querySelector('.word-cycle'))
+  pendingEnter = gsap.delayedCall(delay, () => {
+    incoming.el.classList.add('is-active')
+    incoming.tl.play()
+  })
 
   currentSection = section
 }
-
-startAboutWordCycle(document.querySelector('.word-cycle'))
-
-const navButtons = document.querySelectorAll('.nav-link')
-navButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    const section = button.dataset.section
-    renderSection(section)
-  })
-})
 
 // Animations
 

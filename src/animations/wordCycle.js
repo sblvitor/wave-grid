@@ -6,8 +6,12 @@ let wordIndex = 0
 let activeTween = null
 let pendingCall = null
 
+let activeSplit = null
+let currentEl = null
+
 function cycleWord(el) {
   const exitSplit = SplitText.create(el, { type: 'chars' })
+  activeSplit = exitSplit
 
   activeTween = gsap.timeline()
     .to(exitSplit.chars, {
@@ -27,6 +31,7 @@ function cycleWord(el) {
       el.textContent = lastAboutWord[wordIndex]
 
       const enterSplit = SplitText.create(el, { type: 'chars' })
+      activeSplit = enterSplit
       gsap.set(enterSplit.chars, { autoAlpha: 0, filter: 'blur(12px)' })
 
       activeTween = gsap.to(enterSplit.chars, {
@@ -40,25 +45,26 @@ function cycleWord(el) {
         ease: 'power2.out',
         onComplete: () => {
           enterSplit.revert()
-          pendingCall = gsap.delayedCall(2.5, () => cycleWord(el))
+          pendingCall = gsap.delayedCall(1.5, () => cycleWord(el))
         }
       })
     })
 }
 
 export function stopAboutWordCycle() {
-  if(pendingCall) {
-    pendingCall.kill()
-    pendingCall = null
-  }
-  if(activeTween) {
-    activeTween.kill()
-    activeTween = null
-  }
+  pendingCall?.kill(); pendingCall = null
+  activeTween?.kill(); activeTween = null
+  if(activeSplit) gsap.set(activeSplit.chars, { autoAlpha: 1, filter: 'blur(0px)' })
 }
 
 export function startAboutWordCycle(el) {
+  currentEl = el
   stopAboutWordCycle()
+  pendingCall = gsap.delayedCall(2, () => cycleWord(el))
+}
+
+export function resetAboutWordCycle() {
+  activeSplit?.revert(); activeSplit = null
+  if (currentEl) currentEl.textContent = lastAboutWord[0]
   wordIndex = 0
-  pendingCall = gsap.delayedCall(3, () => cycleWord(el))
 }
